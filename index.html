@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Digibooth by JM & Denisse</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Fredoka+One&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #ffe0f2; /* Light pink ackground */
+      background-image: radial-gradient(circle, rgba(255, 204, 230, 0.3) 1px, transparent 1px); /* Subtle pink dot pattern */
+      background-size: 20px 20px;
+      color: #c2185b; /* Deep pink text */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh; /* Use min-height to avoid issues on smaller viewports */
+      padding: 20px;
+      text-align: center;
+    }
+
+    h2 {
+      font-family: 'Fredoka One', cursive;
+      font-weight: 400;
+      font-size: 2.5rem;
+      color: #f48fb1; /* Medium pink heading */
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .card {
+      background: linear-gradient(to bottom, #fff, #ffebee); /* Very light pink gradient */
+      padding: 30px;
+      border-radius: 30px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      max-width: 450px;
+      width: 100%;
+      text-align: center;
+      transition: 0.3s ease;
+      position: relative;
+      margin-bottom: 20px; /* Add margin for footer */
+    }
+
+    .card::before {
+      content: '♥';
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 1.2rem;
+      color: #ffcdd2; /* Light pink heart */
+      opacity: 0.7;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      border-radius: 15px;
+      border: 1px solid #f8bbd0; /* Light pink border */
+      font-size: 16px;
+      transition: 0.2s;
+    }
+
+    select {
+      background-color: #fce4ec; /* Lighter pink select background */
+      appearance: none;
+      padding-right: 25px;
+      background-image: url('data:image/svg+xml;utf8,<svg fill="%23e91e63" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 10px top 50%;
+      font-family: 'Poppins', sans-serif;
+      color: #c2185b; /* Ensure text color matches theme */
+    }
+
+    button {
+      background: #f48fb1; /* Medium pink button */
+      color: white;
+      font-weight: 500;
+      border: none;
+      box-shadow: 0 4px 14px rgba(244, 143, 177, 0.4);
+      cursor: pointer;
+      transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+    }
+
+    button:hover {
+      background: #e91e63; /* Deeper pink */
+      box-shadow: 0 6px 18px rgba(233, 30, 99, 0.5);
+      transform: scale(1.02);
+    }
+
+    video, canvas { /* Apply general styles */
+      width: 100%;
+      border-radius: 20px;
+      margin-top: 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ****** ADDED/MODIFIED THIS RULE ****** */
+    video#video {
+       /* Explicitly flip the video preview horizontally */
+      transform: scaleX(-1);
+    }
+    /* ************************************* */
+
+    .status {
+      font-size: 16px;
+      margin-top: 10px;
+      color: #e91e63; /* Deeper pink status text */
+      min-height: 24px; /* Prevent layout shift */
+    }
+
+    .countdown {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #e91e63;
+      margin: 10px 0;
+      min-height: 50px; /* Prevent layout shift */
+    }
+
+    .photo-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 25px;
+    }
+
+    .single-photo-container {
+      border: 4px solid #f06292; /* Hot pink border */
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      max-width: 150px; /* Consistent max width */
+      width: 100%;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      background-color: #fff; /* Add background for image loading */
+    }
+
+    .single-photo {
+      width: 100%;
+      /* transform: scaleX(-1); */ /* ENSURE this is commented out or removed */
+      display: block; /* Prevents extra space below image */
+      vertical-align: middle; /* Better alignment */
+    }
+
+    .strip-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 4px solid #f06292; /* Hot pink border */
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      max-width: 150px; /* Set max-width here for consistency */
+      width: 100%;
+      background-color: #fff; /* Add background for image loading */
+    }
+
+    .strip-photo {
+      width: 100%; /* Make images fill container width */
+      /* max-width: 150px; */ /* Removed, controlled by parent */
+      /* transform: scaleX(-1); */ /* ENSURE this is commented out or removed */
+      display: block; /* Prevents extra space below image */
+      vertical-align: middle; /* Better alignment */
+    }
+
+    .download-btn, .download-strip-btn {
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 14px;
+      margin-top: 10px;
+      display: inline-block;
+      transition: background-color 0.2s ease;
+    }
+
+    .download-btn:hover, .download-strip-btn:hover {
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .footer, .credits {
+        margin-top: 15px;
+        font-size: 0.9rem;
+        color: #e91e63; /* Deeper pink */
+        opacity: 0.8;
+    }
+    .credits {
+        font-size: 0.75rem;
+        margin-top: 5px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="start-screen" id="startScreen">
+    <h2>Welcome to Digibooth</h2>
+    <button onclick="startCaptureSession()">Start</button>
+  </div>
+
+  <div class="card hidden" id="captureCard">
+    <select id="cameraSelect">
+      <option value="user">Front Camera</option>
+      <option value="environment">Rear Camera</option>
+    </select>
+    <select id="photoCount">
+      <option value="1">1 Photo</option>
+      <option value="3" selected>3 Photos (Strip)</option>
+      <option value="6">6 Photos (2 Strips)</option>
+      <option value="9">9 Photos (3 Strips)</option>
+    </select>
+    <select id="delaySelect">
+      <option value="2000">2s Delay</option>
+      <option value="3000" selected>3s Delay</option>
+      <option value="5000">5s Delay</option>
+    </select>
+
+    <video id="video" autoplay playsinline muted></video> <div class="status" id="statusText">Select options and press Capture.</div>
+    <div class="countdown hidden" id="countdown"></div>
+
+    <button id="captureButton" onclick="triggerCapture()">Capture Photo</button>
+
+    <div id="singlePhotoPreview" class="photo-preview hidden">
+      <h3>Your Photo:</h3>
+      <div id="singlePhotoContainer" class="single-photo-container">
+        <img id="singlePhotoImg" class="single-photo" src="#" alt="Captured Photo"> </div>
+      <a id="downloadSingleLink" class="download-btn hidden" download="digibooth_photo.png">Download Photo</a>
+    </div>
+
+    <div id="finalStripPreview" class="photo-preview hidden">
+      <h3>Your Photo Strip:</h3>
+      <div id="stripContainer" class="strip-container">
+        </div>
+      <a id="downloadStripLink" class="download-strip-btn hidden" download="digibooth_strip.png">Download Photo Strip</a>
+    </div>
+
+    <audio id="captureSound" src="camera-shutter-click-01.wav" preload="auto"></audio>
+
+  </div>
+
+  <div class="footer">Made with love for Denisse</div>
+  <div class="credits">coded by JM (mako)</div>
+
+  <script>
+    const video = document.getElementById('video');
+    const statusText = document.getElementById('statusText');
+    const singlePhotoPreview = document.getElementById('singlePhotoPreview');
+    const singlePhotoContainer = document.getElementById('singlePhotoContainer');
+    const singlePhotoImg = document.getElementById('singlePhotoImg');
+    const downloadSingleLink = document.getElementById('downloadSingleLink');
+    const finalStripPreview = document.getElementById('finalStripPreview');
+    const stripContainer = document.getElementById('stripContainer');
+    const downloadStripLink = document.getElementById('downloadStripLink');
+    const countdownDisplay = document.getElementById('countdown');
+    const startScreen = document.getElementById('startScreen');
+    const captureCard = document.getElementById('captureCard');
+    const photoCountSelect = document.getElementById('photoCount');
+    const delaySelect = document.getElementById('delaySelect');
+    const cameraSelect = document.getElementById('cameraSelect');
+    const captureButton = document.getElementById('captureButton');
+    const captureSound = document.getElementById('captureSound');
+
+    let stream;
+    let capturedPhotos = [];
+    let photosToCapture = 3; // Default value from select
+    let isCapturing = false;
+
+    // --- Event Listeners ---
+    photoCountSelect.addEventListener('change', resetCaptureState);
+    cameraSelect.addEventListener('change', e => {
+      startCamera(e.target.value);
+      resetCaptureState(); // Reset when camera changes too
+    });
+    delaySelect.addEventListener('change', resetCaptureState); // Reset if delay changes mid-session
+
+    // --- Functions ---
+    function resetCaptureState() {
+      photosToCapture = parseInt(photoCountSelect.value);
+      capturedPhotos = [];
+      isCapturing = false; // Ensure capturing flag is reset
+      hidePreviews();
+      statusText.textContent = `Ready for ${photosToCapture} photo(s). Press Capture.`;
+      captureButton.disabled = false; // Re-enable button
+      captureButton.textContent = 'Capture Photo';
+      countdownDisplay.classList.add('hidden');
+      countdownDisplay.textContent = '';
+    }
+
+    function hidePreviews() {
+      singlePhotoPreview.classList.add('hidden');
+      downloadSingleLink.classList.add('hidden');
+      finalStripPreview.classList.add('hidden');
+      downloadStripLink.classList.add('hidden');
+      stripContainer.innerHTML = ''; // Clear previous strip images
+    }
+
+    async function startCamera(facingMode = 'user') {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      statusText.textContent = 'Initializing camera...';
+      try {
+        // Request a resolution closer to standard photo booth aspect ratio if possible
+        const constraints = {
+            video: {
+                facingMode: facingMode,
+                width: { ideal: 640 },
+                height: { ideal: 480 }
+            },
+            audio: false
+        };
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = stream;
+        // Wait for the video to load metadata to get correct dimensions
+        video.onloadedmetadata = () => {
+             resetCaptureState(); // Call reset state once video is ready
+        };
+
+      } catch (error) {
+        console.error('Error accessing camera:', error);
+        statusText.textContent = 'Failed to access camera. Please allow permissions.';
+        captureButton.disabled = true;
+      }
+    }
+
+    function startCaptureSession() {
+      startScreen.classList.add('hidden');
+      captureCard.classList.remove('hidden');
+      startCamera(cameraSelect.value); // Start with the selected camera
+    }
+
+    async function triggerCapture() {
+      // Prevent starting new capture if already capturing or finished
+      if (isCapturing || capturedPhotos.length >= photosToCapture) {
+         // If finished, allow starting a new session
+         if (!isCapturing && capturedPhotos.length >= photosToCapture) {
+             resetCaptureState(); // Reset everything to start fresh
+         }
+         return; // Exit if currently capturing or just finished and reset
+      }
+
+
+      isCapturing = true; // Set flag
+      captureButton.disabled = true; // Disable button during countdown/capture
+      hidePreviews(); // Hide old previews
+
+      const photoNumber = capturedPhotos.length + 1;
+      statusText.textContent = `Taking photo ${photoNumber} of ${photosToCapture} in...`;
+      countdownDisplay.classList.remove('hidden');
+
+      const delay = parseInt(delaySelect.value);
+      for (let i = delay / 1000; i > 0; i--) {
+        countdownDisplay.textContent = i;
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      countdownDisplay.textContent = '📸'; // Capture indicator
+      statusText.textContent = 'Capturing...';
+      await playSound(); // Wait for sound to be ready if needed
+
+      captureSinglePhoto(); // Capture the photo
+
+      countdownDisplay.classList.add('hidden'); // Hide countdown after capture
+      countdownDisplay.textContent = ''; // Clear indicator
+
+      // Check if more photos are needed
+      if (capturedPhotos.length < photosToCapture) {
+        statusText.textContent = `Photo ${photoNumber} captured! Ready for next (${capturedPhotos.length + 1} of ${photosToCapture})`;
+        captureButton.disabled = false; // Re-enable for next photo
+        captureButton.textContent = `Capture Photo ${capturedPhotos.length + 1}`;
+        isCapturing = false; // Allow next capture
+      } else {
+        // All photos captured
+        statusText.textContent = 'All photos captured! Processing...';
+        captureButton.textContent = 'Processing...'; // Keep button disabled during processing
+        // Use setTimeout to allow UI update before potentially heavy processing
+        setTimeout(() => {
+            if (photosToCapture === 1) {
+                displaySinglePhoto();
+            } else {
+                combinePhotosToStrip();
+            }
+             // Re-enable button after processing and offer reset/new session
+             captureButton.disabled = false;
+             captureButton.textContent = 'Start New Session'; // Change button text
+             isCapturing = false; // Ready for reset on next click
+        }, 500); // Short delay before processing
+      }
+    }
+
+    async function playSound() {
+      try {
+        captureSound.currentTime = 0;
+        await captureSound.play();
+      } catch (error) {
+        console.warn("Could not play capture sound:", error);
+        // Ignore error if playback fails (e.g., browser restrictions)
+      }
+    }
+
+    // ****** THIS FUNCTION HAS BEEN UPDATED ******
+    function captureSinglePhoto() {
+      const canvas = document.createElement('canvas');
+      // Use the actual video dimensions for the canvas
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+
+      // --- NO FLIPPING LOGIC HERE ---
+      // We assume drawImage gets the raw, unflipped data
+      // regardless of the CSS transform on the video element.
+
+      // Draw the direct video frame onto the canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const imageUrl = canvas.toDataURL('image/png'); // Specify PNG format
+      capturedPhotos.push(imageUrl);
+      // Optional: Add console log to check dimensions
+      console.log(`Captured photo ${capturedPhotos.length} - Dimensions: ${canvas.width}x${canvas.height}`);
+    }
+    // *******************************************
+
+    function displaySinglePhoto() {
+      if (capturedPhotos.length === 0) return; // Safety check
+      singlePhotoImg.src = capturedPhotos[0];
+      downloadSingleLink.href = capturedPhotos[0];
+      singlePhotoPreview.classList.remove('hidden');
+      downloadSingleLink.classList.remove('hidden');
+      statusText.textContent = 'Photo captured!';
+    }
+
+    async function combinePhotosToStrip() {
+      if (capturedPhotos.length === 0) {
+        statusText.textContent = 'No photos captured.';
+        return;
+      }
+
+      statusText.textContent = 'Generating photo strip...';
+      stripContainer.innerHTML = ''; // Clear previous attempts
+
+      // Get dimensions from the first captured photo (assuming all are same size)
+      try {
+          // Use the first captured photo's dataURL to get dimensions
+          const firstImage = await loadImage(capturedPhotos[0]);
+          const photoWidth = firstImage.width;
+          const photoHeight = firstImage.height;
+
+          // Validate dimensions
+          if (!photoWidth || !photoHeight) {
+              throw new Error('Could not determine photo dimensions from first image.');
+          }
+
+          const numPhotos = capturedPhotos.length;
+          const stripHeight = numPhotos * photoHeight;
+
+          const stripCanvas = document.createElement('canvas');
+          stripCanvas.width = photoWidth;
+          stripCanvas.height = stripHeight;
+          const stripCtx = stripCanvas.getContext('2d');
+          stripCtx.fillStyle = '#FFFFFF'; // Optional: Set background color if needed
+          stripCtx.fillRect(0, 0, stripCanvas.width, stripCanvas.height);
+
+          // Load all images (already captured as data URLs)
+          const images = await Promise.all(capturedPhotos.map(loadImage));
+
+          // Draw images onto the strip canvas and create preview elements
+          images.forEach((img, index) => {
+            stripCtx.drawImage(img, 0, index * photoHeight, photoWidth, photoHeight);
+
+            // Add individual photos to the visual strip container
+            const stripPhoto = document.createElement('img');
+            stripPhoto.src = capturedPhotos[index]; // Use original data URL for preview img
+            stripPhoto.classList.add('strip-photo');
+            stripPhoto.alt = `Photo ${index + 1}`;
+            stripContainer.appendChild(stripPhoto);
+          });
+
+          // Generate final strip data URL
+          const finalStripUrl = stripCanvas.toDataURL('image/png'); // Specify PNG
+          downloadStripLink.href = finalStripUrl;
+          downloadStripLink.classList.remove('hidden');
+          finalStripPreview.classList.remove('hidden');
+          statusText.textContent = 'Photo strip ready!';
+
+      } catch (error) {
+          console.error('Error loading or drawing images for strip:', error);
+          statusText.textContent = 'Error processing photos.';
+      }
+    }
+
+    // Helper function to load an image and return a promise
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = (err) => {
+            console.error("Failed to load image:", src, err);
+            reject(new Error(`Failed to load image: ${src}`));
+        };
+        img.src = src;
+      });
+    }
+
+  </script>
+</body>
+</html>
